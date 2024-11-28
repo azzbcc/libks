@@ -1284,6 +1284,7 @@ KS_DECLARE(ks_ssize_t) kws_read_frame(kws_t *kws, kws_opcode_t *oc, uint8_t **da
 	int ll = 0;
 	int frag = 0;
 	int blen;
+	kws_opcode_t toc;
 
 	kws->body = kws->bbuffer;
 	kws->packetlen = 0;
@@ -1330,9 +1331,9 @@ KS_DECLARE(ks_ssize_t) kws_read_frame(kws_t *kws, kws_opcode_t *oc, uint8_t **da
 		}
 	}
 
-	*oc = *kws->buffer & 0xf;
+	toc = *kws->buffer & 0xf;
 
-	switch(*oc) {
+	switch(toc) {
 	case WSOC_CLOSE:
 		{
 			/* Nominal case, debug output only */
@@ -1342,19 +1343,20 @@ KS_DECLARE(ks_ssize_t) kws_read_frame(kws_t *kws, kws_opcode_t *oc, uint8_t **da
 			return kws_close(kws, WS_RECV_CLOSE);
 		}
 		break;
-	case WSOC_CONTINUATION:
 	case WSOC_TEXT:
 	case WSOC_BINARY:
 	case WSOC_PING:
 	case WSOC_PONG:
+		*oc = toc;
+	case WSOC_CONTINUATION:
 		{
 			int fin = (kws->buffer[0] >> 7) & 1;
 			int mask = (kws->buffer[1] >> 7) & 1;
 
 
-			if (!fin && *oc != WSOC_CONTINUATION) {
+			if (!fin && toc != WSOC_CONTINUATION) {
 				frag = 1;
-			} else if (fin && *oc == WSOC_CONTINUATION) {
+			} else if (fin && toc == WSOC_CONTINUATION) {
 				frag = 0;
 			}
 
