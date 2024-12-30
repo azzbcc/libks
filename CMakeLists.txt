@@ -90,7 +90,7 @@ if(KS_PLAT_LIN)
 		PATHS /etc
 	)
 
-	find_file(CENTOS_FOUND centos-release
+	find_file(CENTOS_FOUND centos-release rocky-release
 		PATHS /etc
 	)
 
