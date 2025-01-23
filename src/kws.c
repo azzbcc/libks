@@ -1313,7 +1313,7 @@ KS_DECLARE(ks_ssize_t) kws_read_frame(kws_t *kws, kws_opcode_t *oc, uint8_t **da
 		return kws_close(kws, WS_NONE);
 	}
 
-	if ((kws->datalen = kws_string_read(kws, kws->buffer, 9 + 1, kws->block)) < 0) { // read 9 bytes into NULL terminated 10 byte buffer
+	if ((kws->datalen = kws_string_read(kws, kws->buffer, 2 + 1, kws->block)) < 0) { // read 9 bytes into NULL terminated 10 byte buffer
 		ks_log(KS_LOG_ERROR, "Read frame error because kws_string_read returned %ld\n", kws->datalen);
 		if (kws->datalen == -2) {
 			return -2;
@@ -1322,11 +1322,11 @@ KS_DECLARE(ks_ssize_t) kws_read_frame(kws_t *kws, kws_opcode_t *oc, uint8_t **da
 	}
 
 	if (kws->datalen < need) {
-		ssize_t bytes = kws_string_read(kws, kws->buffer + kws->datalen, 9 - kws->datalen, WS_BLOCK);
+		ssize_t bytes = kws_raw_read(kws, kws->buffer + kws->datalen, 2 - kws->datalen, WS_BLOCK);
 
 		if (bytes < 0 || (kws->datalen += bytes) < need) {
 			/* too small - protocol err */
-			ks_log(KS_LOG_ERROR, "Read frame error because kws_string_read: bytes = %ld, datalen = %ld, needed = %ld\n", bytes, kws->datalen, need);
+			ks_log(KS_LOG_ERROR, "Read frame error because kws_raw_read: bytes = %ld, datalen = %ld, needed = %ld\n", bytes, kws->datalen, need);
 			return kws_close(kws, WS_NONE);
 		}
 	}
